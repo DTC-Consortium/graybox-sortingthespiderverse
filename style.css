@@ -20,6 +20,7 @@
   background-size: 16px 16px;
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 /* Use instead of Windi/Uno's h-full on the slide-body wrapper below an <h1>:
@@ -121,4 +122,77 @@
   color: var(--spider-red);
   display: block;
   margin-bottom: 0.25em;
+}
+
+.title-footer {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 1.6em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4em;
+}
+.nav-hint {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  font-weight: 600;
+  color: var(--web-blue);
+}
+.credit {
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  opacity: 0.6;
+}
+
+.prompt-panel {
+  height: 100%;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-size: 0.85em;
+}
+.prompt-text {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  font-family: var(--font-mono);
+  font-size: 0.68em;
+  line-height: 1.55;
+  background: var(--ink);
+  color: #e9e4d6;
+  border-radius: 6px;
+  padding: 0.8em 1em;
+  white-space: pre-wrap;
+}
+
+.image-slide {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5em;
+}
+.hero-image {
+  max-width: 100%;
+  max-height: 76%;
+  object-fit: contain;
+  border: 2.5px solid var(--ink);
+  border-radius: 8px;
+  box-shadow: 4px 4px 0 var(--ink);
+}
+.image-caption {
+  font-family: var(--font-display);
+  color: var(--spider-red);
+  -webkit-text-stroke: 1px var(--ink);
+  font-size: 2em;
+  letter-spacing: 0.03em;
+}
+.image-credit {
+  font-family: var(--font-mono);
+  font-size: 0.75em;
+  opacity: 0.65;
 }
