@@ -1,0 +1,7 @@
+node_modules/
+.npm-cache/
+.pw-browsers/
+dist/
+.slidev/
+*.local
+.DS_Store
