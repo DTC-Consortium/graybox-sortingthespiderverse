@@ -77,18 +77,20 @@ function randomizeAll() {
   min-height: 0;
 }
 .cell {
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  background: #f8fafc;
+  border: 2px solid var(--ink, #1b1b1f);
+  box-shadow: 3px 3px 0 var(--ink, #1b1b1f);
+  border-radius: 8px;
+  background: #ffffff8c;
   padding: 8px 10px;
   display: flex;
   flex-direction: column;
   min-height: 0;
+  min-width: 0;
   position: relative;
   transition: border-color 0.2s ease, background 0.2s ease;
 }
 .cell.done {
-  border-color: #2f9e44;
+  border-color: var(--web-green, #2f8f5b);
   background: #f1fdf3;
 }
 .cell-head {
@@ -96,22 +98,30 @@ function randomizeAll() {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 6px;
+  min-width: 0;
 }
 .cell-title {
+  font-family: var(--font-display, 'Bangers', sans-serif);
+  letter-spacing: 0.02em;
   font-weight: 700;
-  font-size: 0.8rem;
-  color: #1e3a8a;
+  font-size: 1.1rem;
+  color: var(--spider-red, #d6273c);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 .cell-viz {
   flex: 1;
   min-height: 0;
+  min-width: 0;
 }
 .finished-badge {
   position: absolute;
   top: 6px;
   right: 10px;
-  font-size: 0.7rem;
-  color: #2f9e44;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  font-size: 0.65rem;
+  color: var(--web-green, #2f8f5b);
   font-weight: 700;
 }
 </style>

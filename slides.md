@@ -14,17 +14,15 @@ transition: slide-left
 mdc: true
 fonts:
   sans: 'Inter'
-  mono: 'Fira Code'
+  mono: 'JetBrains Mono'
 ---
-
-<div class="text-7xl">🕷️</div>
 
 # Sorting the Spider‑Verse
 
-### Four sorting algorithms, racing to rank every Spider‑Man movie by box office
+### Ranking every Spider‑Man film by box-office revenue, four algorithms at a time
 
-<div class="pt-10 opacity-60 text-sm">
-Bubble Sort · Insertion Sort · Heap Sort · Quick Sort
+<div class="pt-8">
+<span class="tag">Bubble Sort</span><span class="tag">Insertion Sort</span><span class="tag">Heap Sort</span><span class="tag">Quick Sort</span>
 </div>
 
 <!--
@@ -36,10 +34,42 @@ so the audience can compare how each algorithm gets to the same answer.
 layout: default
 ---
 
+# A brief history of sorting
+
+<div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+<div class="panel">
+
+Sorting is older than electronic computing itself. **Herman Hollerith** built mechanical
+card-sorting machines for the 1890 U.S. Census; **John von Neumann** described merge sort
+for a stored-program computer in 1945; and **John Mauchly**'s 1946 lectures gave one of the
+first published treatments of sorting on a computer. By the time **Donald Knuth** devoted an
+entire volume of *The Art of Computer Programming* (1973) to "Sorting and Searching," most of
+the algorithms taught today — including the four in this deck — had already been invented,
+between roughly 1954 and 1964.
+
+</div>
+<div class="panel">
+
+**Why it still matters**
+
+Sorting is one of the most frequently executed operations in all of computing — it underlies
+database indexes and `ORDER BY` queries, search-engine ranking, GPS routing, and computer
+graphics, and it's the standard example used to teach algorithmic complexity in the first
+place. Every mainstream language ships a highly-tuned sort in its standard library (Python and
+Java's Timsort, C++'s Introsort) — modern hybrids built directly on the classic ideas this deck
+walks through.
+
+</div>
+</div>
+
+---
+layout: default
+---
+
 # Compiling the data
 
-<div class="grid grid-cols-2 gap-8 mt-4 text-sm">
-<div>
+<div class="grid grid-cols-2 gap-6 mt-2 text-xs">
+<div class="panel">
 
 **Inclusion rule**
 
@@ -58,7 +88,7 @@ Variety, and The Hollywood Reporter. Snapshot date: **2026‑08‑31**.
 *Spider‑Man: Brand New Day* (2026) is still in release, so its total is a moving target.
 
 </div>
-<div>
+<div class="panel">
 
 | Film | Year | Worldwide gross |
 |---|---|---|
@@ -81,41 +111,46 @@ Variety, and The Hollywood Reporter. Snapshot date: **2026‑08‑31**.
 layout: default
 ---
 
-# The sorting algorithms
+# Four ways to sort a list
 
-Every slide from here on sorts the same 11 films **by worldwide gross, ascending** — the only thing that changes is *how*.
+<div class="grid grid-cols-2 gap-4 mt-4 text-sm">
+<div class="panel">
+<h3>Bubble Sort</h3>
+Repeatedly compare neighbors and swap the ones out of order, letting the largest values
+"bubble" to the end one pass at a time.
+<div class="mt-2 opacity-60">O(n²) average · O(1) space</div>
+</div>
+<div class="panel">
+<h3>Insertion Sort</h3>
+Grow a sorted prefix one film at a time, sliding each new value backward until it lands in
+the right spot — like sorting a hand of cards.
+<div class="mt-2 opacity-60">O(n²) average · O(1) space</div>
+</div>
+<div class="panel">
+<h3>Heap Sort</h3>
+Build a max-heap so the biggest earner is always at the root, then repeatedly move the root
+to the end and re-heapify what's left.
+<div class="mt-2 opacity-60">O(n log n) average · O(1) space</div>
+</div>
+<div class="panel">
+<h3>Quick Sort</h3>
+Partition the list around a pivot so smaller values fall left and larger values fall right,
+then recursively sort each side.
+<div class="mt-2 opacity-60">O(n log n) average · O(log n) space</div>
+</div>
+</div>
 
-<div class="grid grid-cols-2 gap-4 mt-6 text-sm">
-<div class="p-4 rounded-lg bg-blue-50">
-<b class="text-blue-800">Bubble Sort</b> — O(n²)<br/>
-repeatedly swaps neighboring pairs that are out of order.
-</div>
-<div class="p-4 rounded-lg bg-blue-50">
-<b class="text-blue-800">Insertion Sort</b> — O(n²)<br/>
-grows a sorted prefix, inserting one film at a time.
-</div>
-<div class="p-4 rounded-lg bg-red-50">
-<b class="text-red-700">Heap Sort</b> — O(n log n)<br/>
-builds a max-heap, then repeatedly extracts the max.
-</div>
-<div class="p-4 rounded-lg bg-red-50">
-<b class="text-red-700">Quick Sort</b> — O(n log n)<br/>
-partitions around a pivot, then recurses on each side.
-</div>
-</div>
-
-<div class="mt-6 text-xs opacity-60">
-Two classic O(n²) comparison sorts, paired with two O(n log n) sorts — so the next slide's race
-should have a predictable winner. Or will it?
+<div class="mt-4 text-xs opacity-60">
+Next: watch all four race side by side on the exact same shuffled dataset.
 </div>
 
 ---
 layout: default
 ---
 
-# All four algorithms, live
+# All four, head to head
 
-<div class="h-full pb-4">
+<div class="content-body">
 <MultiSortGrid />
 </div>
 
@@ -125,7 +160,7 @@ layout: default
 
 # Bubble Sort
 
-<div class="h-full pb-2">
+<div class="content-body">
 <AlgoPanel algo-id="bubble" />
 </div>
 
@@ -135,7 +170,7 @@ layout: default
 
 # Insertion Sort
 
-<div class="h-full pb-2">
+<div class="content-body">
 <AlgoPanel algo-id="insertion" />
 </div>
 
@@ -145,7 +180,7 @@ layout: default
 
 # Heap Sort
 
-<div class="h-full pb-2">
+<div class="content-body">
 <AlgoPanel algo-id="heap" />
 </div>
 
@@ -155,22 +190,6 @@ layout: default
 
 # Quick Sort
 
-<div class="h-full pb-2">
+<div class="content-body">
 <AlgoPanel algo-id="quick" />
-</div>
-
----
-layout: cover
-background: /big-house-swing.svg
-class: text-center
----
-
-<div class="pt-40">
-
-# That's a wrap 🕸️
-
-### Thanks for sorting through the Spider‑Verse
-
-<div class="text-sm opacity-90 mt-4">Go Blue 💙💛</div>
-
 </div>

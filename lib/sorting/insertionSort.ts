@@ -10,8 +10,8 @@ export function* insertionSortSteps(arr: SortArray): SortGenerator {
     while (j >= 0) {
       yield { line: 2, action: 'compare', i: j, j: j + 1 }
       if (arr[j].worldwideGross <= key.worldwideGross) break
-      yield { line: 3, action: 'overwrite', i: j + 1, j, value: arr[j] }
       arr[j + 1] = arr[j]
+      yield { line: 3, action: 'overwrite', i: j + 1, j, value: arr[j + 1] }
       j--
     }
     arr[j + 1] = key

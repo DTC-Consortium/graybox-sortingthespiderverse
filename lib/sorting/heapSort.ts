@@ -15,8 +15,8 @@ function* heapify(arr: SortArray, i: number, size: number): SortGenerator {
   }
   yield { line: 9, action: 'setline', i, j: largest }
   if (largest !== i) {
-    yield { line: 9, action: 'swap', i, j: largest }
     ;[arr[i], arr[largest]] = [arr[largest], arr[i]]
+    yield { line: 9, action: 'swap', i, j: largest }
     yield* heapify(arr, largest, size)
   }
 }
@@ -29,8 +29,8 @@ export function* heapSortSteps(arr: SortArray): SortGenerator {
   }
   for (let end = n - 1; end > 0; end--) {
     yield { line: 1, action: 'setline', i: end }
-    yield { line: 2, action: 'swap', i: 0, j: end }
     ;[arr[0], arr[end]] = [arr[end], arr[0]]
+    yield { line: 2, action: 'swap', i: 0, j: end }
     yield { line: 3, action: 'setline', i: 0 }
     yield* heapify(arr, 0, end)
     yield { line: 1, action: 'markSorted', i: end }

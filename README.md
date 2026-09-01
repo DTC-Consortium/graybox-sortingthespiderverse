@@ -5,17 +5,28 @@ and Quick Sort by racing them against each other on real Spider-Man box-office d
 
 Live site: https://ocj-dev.github.io/sortingthespiderverse/
 
-## What's inside
+This repository hosts three versions of the deck, all built from the same source tree and
+deployed together:
+
+- **/** — the current, actively-maintained deck (this directory).
+- **/claudecode/** — a frozen snapshot of the deck as it stood at the `initial` git tag.
+- **/claude/** — a separately-produced version of the deck, kept for comparison.
+
+## What's inside (root deck)
 
 - `data/spiderman-movies.ts` — worldwide box-office gross for every film where Spider-Man is
   the lead protagonist (see the deck's "Compiling the data" slide for sourcing/inclusion rules).
 - `lib/sorting/` — each algorithm is a JS generator that yields one step (`compare`, `swap`,
   `overwrite`, `markSorted`, `done`) at a time, tagged with the pseudocode line it corresponds to.
-  A shared `useSorter` composable drives the generator on a timer and exposes reactive state for
-  the UI, so the bar-chart highlight and the pseudocode highlight always come from the same event.
-- `components/` — `SortBars`, `SortControls`, `PseudocodeView`, `StatsBadge`, `AlgoPanel` (single
-  algorithm + pseudocode), and `MultiSortGrid` (all four running simultaneously in a 2×2 grid).
-- `public/big-house-swing.svg` — original stylized illustration for the closing slide.
+  `useSorter.ts` runs each generator once to precompute a full trace (array snapshot + running
+  stats after every step), so Play/Pause/Step Forward/Step Back/Reset/Randomize are all just
+  index navigation over that trace — the bar-chart highlight and the pseudocode highlight always
+  come from the same recorded step, and stepping backward is exact rather than reconstructed.
+- `components/` — `SortBars`, `SortControls` (Start/Pause/Step Forward/Step Back/Reset/Randomize),
+  `PseudocodeView`, `StatsBadge`, `AlgoPanel` (single algorithm + pseudocode + history note), and
+  `MultiSortGrid` (all four running simultaneously in a 2×2 grid).
+- `style.css` — the comic-panel design system (paper background, Bangers display font, ink/red/
+  blue/amber/green palette).
 
 ## Local development
 
@@ -27,5 +38,6 @@ npm run build    # static site in dist/, base path set for GitHub Pages
 
 ## Deployment
 
-Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the deck and publishes
-it via GitHub Pages (Actions-based deployment).
+Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the root deck and the
+`claudecode/` sub-deck, copies the static `claude/` build alongside them, and publishes the
+merged output via GitHub Pages (Actions-based deployment).

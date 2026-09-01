@@ -9,12 +9,12 @@ function* partition(arr: SortArray, lo: number, hi: number): Generator<SortStep,
     yield { line: 8, action: 'compare', i: j, j: hi }
     if (arr[j].worldwideGross < pivot.worldwideGross) {
       i++
-      yield { line: 8, action: 'swap', i, j }
       ;[arr[i], arr[j]] = [arr[j], arr[i]]
+      yield { line: 8, action: 'swap', i, j }
     }
   }
-  yield { line: 9, action: 'swap', i: i + 1, j: hi }
   ;[arr[i + 1], arr[hi]] = [arr[hi], arr[i + 1]]
+  yield { line: 9, action: 'swap', i: i + 1, j: hi }
   yield { line: 10, action: 'markSorted', i: i + 1 }
   return i + 1
 }

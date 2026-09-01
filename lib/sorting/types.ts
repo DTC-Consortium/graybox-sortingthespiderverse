@@ -26,6 +26,7 @@ export interface AlgoMeta {
   id: 'bubble' | 'insertion' | 'heap' | 'quick'
   name: string
   summary: string
+  history: string
   time: { best: string; average: string; worst: string }
   space: string
 }

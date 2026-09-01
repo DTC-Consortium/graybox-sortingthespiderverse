@@ -38,24 +38,27 @@ function fmt(gross: number) {
 
 <template>
   <div class="sort-bars" :class="[orientation, { compact }]">
-    <TransitionGroup name="bar" tag="div" class="bar-track">
+    <TransitionGroup name="bar" tag="div" class="bar-track-list">
       <div
         v-for="(item, index) in items"
         :key="item.title"
         class="bar-item"
         :class="stateFor(index)"
       >
-        <div
-          class="bar"
-          :style="
-            orientation === 'vertical'
-              ? { height: pct(item.worldwideGross) + '%' }
-              : { width: pct(item.worldwideGross) + '%' }
-          "
-        >
-          <span v-if="!compact" class="bar-value">{{ fmt(item.worldwideGross) }}</span>
+        <div v-if="orientation === 'horizontal' && !compact" class="bar-label">{{ item.shortTitle }}</div>
+        <div class="bar-track">
+          <div
+            class="bar-fill"
+            :style="
+              orientation === 'vertical'
+                ? { height: pct(item.worldwideGross) + '%' }
+                : { width: pct(item.worldwideGross) + '%' }
+            "
+          >
+            <span v-if="!compact && orientation === 'horizontal'" class="bar-value">{{ fmt(item.worldwideGross) }}</span>
+          </div>
         </div>
-        <div v-if="!compact" class="bar-label">{{ item.shortTitle }} <small>'{{ String(item.year).slice(2) }}</small></div>
+        <div v-if="orientation === 'vertical' && !compact" class="bar-label vertical">{{ item.shortTitle }}</div>
       </div>
     </TransitionGroup>
   </div>
@@ -65,34 +68,36 @@ function fmt(gross: number) {
 .sort-bars {
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
-.bar-track {
+.bar-track-list {
   display: flex;
   width: 100%;
   height: 100%;
+  min-width: 0;
+  min-height: 0;
 }
-.sort-bars.vertical .bar-track {
+.sort-bars.vertical .bar-track-list {
   flex-direction: row;
   align-items: flex-end;
   gap: 6px;
-  height: 100%;
 }
-.sort-bars.horizontal .bar-track {
+.sort-bars.horizontal .bar-track-list {
   flex-direction: column;
   justify-content: center;
   gap: 4px;
-  width: 100%;
-  height: 100%;
   overflow-y: auto;
 }
 
 .bar-item {
   display: flex;
+  min-width: 0;
   transition: transform 0.35s ease;
 }
 .sort-bars.vertical .bar-item {
   flex: 1 1 0;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
   height: 100%;
   min-width: 0;
@@ -100,75 +105,103 @@ function fmt(gross: number) {
 .sort-bars.horizontal .bar-item {
   flex-direction: row;
   align-items: center;
-  gap: 8px;
+  gap: 0.6em;
+  min-width: 0;
+  flex: 0 0 auto;
 }
 
-.bar {
-  border-radius: 4px;
-  transition: background-color 0.15s ease, box-shadow 0.15s ease, height 0.15s ease, width 0.15s ease;
-  background: linear-gradient(180deg, #3b5bdb, #1e3a8a);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
+.bar-track {
+  background: #1b1b1f14;
+  border: 1.5px solid #1b1b1f40;
+  border-radius: 3px;
   position: relative;
+  overflow: hidden;
+  min-width: 0;
 }
-.sort-bars.vertical .bar {
+.sort-bars.vertical .bar-track {
   width: 100%;
-  background: linear-gradient(180deg, #3b5bdb, #1e3a8a);
+  flex: 1;
+  align-self: stretch;
+  display: flex;
+  align-items: flex-end;
 }
-.sort-bars.horizontal .bar {
-  height: 20px;
-  min-height: 16px;
-  background: linear-gradient(90deg, #1e3a8a, #3b5bdb);
+.sort-bars.horizontal .bar-track {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 1.5em;
 }
-
-.bar-item.compare .bar {
-  background: linear-gradient(180deg, #ffd43b, #f59f00) !important;
-  box-shadow: 0 0 14px 2px rgba(245, 159, 0, 0.7);
-}
-.bar-item.swap .bar {
-  background: linear-gradient(180deg, #ff6b6b, #e03131) !important;
-  box-shadow: 0 0 14px 2px rgba(224, 49, 49, 0.75);
-  animation: pulse 0.3s ease;
-}
-.bar-item.sorted .bar {
-  background: linear-gradient(180deg, #51cf66, #2f9e44) !important;
+.sort-bars.horizontal.compact .bar-track {
+  height: 1.15em;
 }
 
-@keyframes pulse {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.06); }
-  100% { transform: scale(1); }
+.bar-fill {
+  background: var(--web-blue, #2b5dae);
+  border-radius: 2px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease, width 0.3s ease, height 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  padding-right: 6px;
+}
+.sort-bars.vertical .bar-fill {
+  width: 100%;
+}
+.sort-bars.horizontal .bar-fill {
+  height: 100%;
+  position: absolute;
+  inset: 0 auto 0 0;
+}
+
+.bar-item.compare .bar-fill {
+  background: var(--amber, #f2b705) !important;
+}
+.bar-item.compare .bar-track {
+  border-color: var(--amber, #f2b705);
+  box-shadow: 0 0 0 2px #f2b70559;
+}
+.bar-item.swap .bar-fill {
+  background: var(--spider-red, #d6273c) !important;
+}
+.bar-item.swap .bar-track {
+  border-color: var(--spider-red, #d6273c);
+  box-shadow: 0 0 0 3px #d6273c66;
+}
+.bar-item.sorted .bar-fill {
+  background: var(--web-green, #2f8f5b) !important;
+}
+.bar-item.sorted .bar-track {
+  border-color: var(--web-green, #2f8f5b);
 }
 
 .bar-value {
-  font-size: 0.62rem;
+  font-size: 0.62em;
   font-weight: 600;
   color: white;
-  margin-top: 2px;
+  text-shadow: 0 1px 1px #00000059;
   white-space: nowrap;
 }
-.sort-bars.horizontal .bar-value {
-  margin: 0 0 0 8px;
-  position: absolute;
-  left: 100%;
-  color: #1e293b;
-}
+
 .bar-label {
-  font-size: 0.6rem;
-  text-align: center;
-  line-height: 1.1;
-  margin-top: 4px;
-  color: var(--slidev-code-foreground, #334155);
-  max-width: 100%;
+  font-family: var(--font-mono, 'JetBrains Mono', monospace);
+  color: var(--ink, #1b1b1f);
+  font-size: 0.7em;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .sort-bars.horizontal .bar-label {
-  width: 150px;
   flex: 0 0 auto;
+  width: 9em;
   text-align: right;
-  font-size: 0.72rem;
+}
+.bar-label.vertical {
+  width: 100%;
+  text-align: center;
+  margin-top: 4px;
+  font-size: 0.62em;
+  line-height: 1.1;
 }
 
 .compact .bar-value,

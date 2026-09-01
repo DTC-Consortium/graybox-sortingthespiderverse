@@ -8,8 +8,8 @@ export function* bubbleSortSteps(arr: SortArray): SortGenerator {
       yield { line: 1, action: 'setline', i: j }
       yield { line: 2, action: 'compare', i: j, j: j + 1 }
       if (arr[j].worldwideGross > arr[j + 1].worldwideGross) {
-        yield { line: 3, action: 'swap', i: j, j: j + 1 }
         ;[arr[j], arr[j + 1]] = [arr[j + 1], arr[j]]
+        yield { line: 3, action: 'swap', i: j, j: j + 1 }
       }
     }
     yield { line: 4, action: 'markSorted', i: n - 1 - i }

@@ -26,8 +26,17 @@ jobs:
           cache: 'npm'
 
       - run: npm ci
-
       - run: npm run build
+      - run: cp dist/index.html dist/404.html
+
+      - run: npm ci
+        working-directory: claudecode
+      - run: npm run build
+        working-directory: claudecode
+
+      - run: mkdir -p dist/claudecode dist/claude
+      - run: cp -r claudecode/dist/. dist/claudecode/
+      - run: cp -r claude/. dist/claude/
 
       - uses: actions/upload-pages-artifact@v3
         with:
