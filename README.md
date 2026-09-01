@@ -5,12 +5,13 @@ and Quick Sort by racing them against each other on real Spider-Man box-office d
 
 Live site: https://ocj-dev.github.io/sortingthespiderverse/
 
-This repository hosts three versions of the deck, all built from the same source tree and
-deployed together:
+This repository hosts four versions of the deck, deployed together:
 
-- **/** — the current, actively-maintained deck (this directory).
+- **/** — the current, actively-maintained deck (this directory), built with Claude Code.
 - **/claudecode/** — a frozen snapshot of the deck as it stood at the `initial` git tag.
-- **/claude/** — a separately-produced version of the deck, kept for comparison.
+- **/claude/** — a separately-produced version of the deck built with Claude.ai, kept for comparison.
+- **/partyrock/** — a separately-produced version built with AWS PartyRock (a single self-contained
+  `index.html`, no build step), also kept for comparison.
 
 ## What's inside (root deck)
 
@@ -39,5 +40,5 @@ npm run build    # static site in dist/, base path set for GitHub Pages
 ## Deployment
 
 Pushing to `main` triggers `.github/workflows/deploy.yml`, which builds the root deck and the
-`claudecode/` sub-deck, copies the static `claude/` build alongside them, and publishes the
-merged output via GitHub Pages (Actions-based deployment).
+`claudecode/` sub-deck, copies the static `claude/` and `partyrock/` builds alongside them, and
+publishes the merged output via GitHub Pages (Actions-based deployment).

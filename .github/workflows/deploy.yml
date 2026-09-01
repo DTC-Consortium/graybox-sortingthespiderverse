@@ -34,9 +34,10 @@ jobs:
       - run: npm run build
         working-directory: claudecode
 
-      - run: mkdir -p dist/claudecode dist/claude
+      - run: mkdir -p dist/claudecode dist/claude dist/partyrock
       - run: cp -r claudecode/dist/. dist/claudecode/
       - run: cp -r claude/. dist/claude/
+      - run: cp -r partyrock/. dist/partyrock/
 
       - uses: actions/upload-pages-artifact@v3
         with:

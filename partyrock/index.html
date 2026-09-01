@@ -1,0 +1,1628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorting Spider-Man</title>
+<style>
+:root {
+  --bg-dark: #0f0f1a;
+  --text-white: #ffffff;
+  --spider-red: #E23636;
+  --spider-blue: #1E90FF;
+  --heap-green: #00C851;
+  --quick-orange: #FF8C00;
+  --idle-bar: #555555;
+  --compare-yellow: #FFD700;
+  --swap-red: #FF4444;
+  --code-bg: #111111;
+  --pivot-purple: #9B59B6;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg-dark);
+  color: var(--text-white);
+  overflow: hidden;
+}
+
+#presentation {
+  width: 100vw;
+  height: 100vh;
+  position: relative;
+}
+
+.slide {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding: 60px;
+  opacity: 0;
+  transform: translateX(100%);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  pointer-events: none;
+  overflow-y: auto;
+}
+
+.slide.active {
+  opacity: 1;
+  transform: translateX(0);
+  pointer-events: all;
+}
+
+.slide.prev {
+  transform: translateX(-100%);
+}
+
+#controls {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  z-index: 1000;
+}
+
+button {
+  padding: 10px 20px;
+  background: var(--spider-red);
+  color: var(--text-white);
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+button:hover {
+  opacity: 0.8;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#slideCounter {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 72px;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--spider-red), var(--spider-blue));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+h2 {
+  font-size: 48px;
+  margin-bottom: 30px;
+  color: var(--spider-red);
+}
+
+h3 {
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 20px;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 20px 0;
+}
+
+th {
+  background: var(--spider-red);
+  padding: 15px;
+  text-align: left;
+  font-size: 18px;
+}
+
+td {
+  padding: 12px 15px;
+  font-size: 16px;
+  border-bottom: 1px solid #333;
+}
+
+tr:nth-child(even) {
+  background: #1a1a2e;
+}
+
+tr:nth-child(odd) {
+  background: #16162a;
+}
+
+.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 28px;
+  color: var(--spider-blue);
+  margin-bottom: 40px;
+}
+
+.credit {
+  margin-top: 40px;
+  font-size: 16px;
+  opacity: 0.7;
+}
+
+.grid-race {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+  height: calc(100vh - 250px);
+}
+
+.algo-panel {
+  border: 2px solid;
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.algo-panel h3 {
+  margin: 0 0 15px 0;
+  font-size: 24px;
+}
+
+.algo-panel.bubble { border-color: var(--spider-red); }
+.algo-panel.insertion { border-color: var(--spider-blue); }
+.algo-panel.heap { border-color: var(--heap-green); }
+.algo-panel.quick { border-color: var(--quick-orange); }
+
+.algo-panel.bubble h3 { color: var(--spider-red); }
+.algo-panel.insertion h3 { color: var(--spider-blue); }
+.algo-panel.heap h3 { color: var(--heap-green); }
+.algo-panel.quick h3 { color: var(--quick-orange); }
+
+.algo-panel svg {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+}
+
+.stats {
+  margin-top: 10px;
+  font-size: 14px;
+  font-family: monospace;
+}
+
+.done-badge {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: #00C851;
+  color: white;
+  padding: 5px 15px;
+  border-radius: 20px;
+  font-weight: bold;
+  display: none;
+}
+
+.done-badge.show {
+  display: block;
+}
+
+.race-controls {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
+}
+
+.race-controls button {
+  padding: 12px 24px;
+}
+
+.race-controls input[type="range"] {
+  width: 200px;
+}
+
+.two-column {
+  display: grid;
+  grid-template-columns: 55% 45%;
+  gap: 30px;
+  height: calc(100vh - 200px);
+}
+
+.left-column {
+  display: flex;
+  flex-direction: column;
+}
+
+.left-column svg {
+  flex: 1;
+  width: 100%;
+  border: 2px solid var(--spider-red);
+  border-radius: 10px;
+  background: #1a1a2e;
+}
+
+.single-controls {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.single-controls button {
+  flex: 1;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.pseudocode {
+  background: var(--code-bg);
+  padding: 20px;
+  border-radius: 10px;
+  font-family: 'Courier New', monospace;
+  font-size: 13px;
+  line-height: 1.8;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.code-line {
+  display: flex;
+  padding: 2px 5px;
+  border-radius: 3px;
+}
+
+.code-line.active {
+  background: var(--compare-yellow);
+  color: #000;
+}
+
+.code-line.compare {
+  background: var(--spider-blue);
+}
+
+.code-line.swap {
+  background: var(--spider-red);
+}
+
+.line-num {
+  display: inline-block;
+  width: 30px;
+  color: #666;
+  margin-right: 10px;
+}
+
+.summary {
+  background: #1a1a2e;
+  padding: 15px;
+  border-radius: 10px;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.complexity-table {
+  margin: 30px 0;
+}
+
+.complexity-table th {
+  background: var(--spider-blue);
+}
+
+.final-svg {
+  margin: 30px auto;
+}
+
+.medal {
+  font-size: 20px;
+  margin-right: 5px;
+}
+</style>
+</head>
+<body>
+
+<div id="presentation">
+  <!-- SLIDE 1: TITLE -->
+  <div class="slide active" data-slide="1">
+    <div class="centered">
+      <svg width="200" height="200" style="position: absolute; top: 40px; right: 40px;">
+        <line x1="100" y1="0" x2="100" y2="200" stroke="var(--spider-red)" stroke-width="2"/>
+        <line x1="0" y1="100" x2="200" y2="100" stroke="var(--spider-red)" stroke-width="2"/>
+        <line x1="20" y1="20" x2="180" y2="180" stroke="var(--spider-blue)" stroke-width="2"/>
+        <line x1="180" y1="20" x2="20" y2="180" stroke="var(--spider-blue)" stroke-width="2"/>
+        <circle cx="100" cy="100" r="80" fill="none" stroke="var(--spider-red)" stroke-width="2"/>
+        <circle cx="100" cy="100" r="50" fill="none" stroke="var(--spider-blue)" stroke-width="2"/>
+      </svg>
+      <h1>Sorting Spider-Man</h1>
+      <div class="subtitle">Visualizing Sorting Algorithms Through Box Office Data</div>
+      <div class="credit">Built with PartyRock on Amazon Bedrock</div>
+    </div>
+  </div>
+
+  <!-- SLIDE 2: DATA COMPILATION -->
+  <div class="slide" data-slide="2">
+    <h2>The Dataset</h2>
+    <p>Data was compiled from Box Office Mojo, The Numbers, and IMDb. The criteria for inclusion: films where Spider-Man (any version) is the sole main protagonist. Note that Beyond the Spider-Verse revenue is estimated based on industry projections.</p>
+    <table>
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Title</th>
+          <th>Year</th>
+          <th>Revenue (USD)</th>
+        </tr>
+      </thead>
+      <tbody id="dataTable">
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SLIDE 3: ALGORITHMS OVERVIEW -->
+  <div class="slide" data-slide="3">
+    <h2>Four Algorithms, One Race</h2>
+    <p>The four algorithms selected represent a range of complexity classes from quadratic to linearithmic. This allows us to observe how algorithmic efficiency impacts performance on real-world data, even with a modest dataset of just 11 elements.</p>
+    <table class="complexity-table">
+      <thead>
+        <tr>
+          <th>Algorithm</th>
+          <th>Best Case</th>
+          <th>Average Case</th>
+          <th>Worst Case</th>
+          <th>Space</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Bubble Sort</strong></td>
+          <td>O(n)</td>
+          <td>O(n²)</td>
+          <td>O(n²)</td>
+          <td>O(1)</td>
+        </tr>
+        <tr>
+          <td><strong>Insertion Sort</strong></td>
+          <td>O(n)</td>
+          <td>O(n²)</td>
+          <td>O(n²)</td>
+          <td>O(1)</td>
+        </tr>
+        <tr>
+          <td><strong>Heap Sort</strong></td>
+          <td>O(n log n)</td>
+          <td>O(n log n)</td>
+          <td>O(n log n)</td>
+          <td>O(1)</td>
+        </tr>
+        <tr>
+          <td><strong>Quick Sort</strong></td>
+          <td>O(n log n)</td>
+          <td>O(n log n)</td>
+          <td>O(n²)</td>
+          <td>O(log n)</td>
+        </tr>
+      </tbody>
+    </table>
+    <p>These four were chosen to demonstrate the stark difference between quadratic-time algorithms (Bubble and Insertion) and linearithmic algorithms (Heap and Quick), while also showing variations in implementation complexity and practical performance characteristics.</p>
+  </div>
+
+  <!-- SLIDE 4: THE BIG RACE -->
+  <div class="slide" data-slide="4">
+    <h2 style="text-align: center; margin-bottom: 20px;">The Big Race</h2>
+    <div class="grid-race">
+      <div class="algo-panel bubble">
+        <h3>Bubble Sort</h3>
+        <svg id="bubbleSvg"></svg>
+        <div class="stats">Steps: <span id="bubbleSteps">0</span> | Comparisons: <span id="bubbleComps">0</span></div>
+        <div class="done-badge" id="bubbleDone">DONE</div>
+      </div>
+      <div class="algo-panel insertion">
+        <h3>Insertion Sort</h3>
+        <svg id="insertionSvg"></svg>
+        <div class="stats">Steps: <span id="insertionSteps">0</span> | Comparisons: <span id="insertionComps">0</span></div>
+        <div class="done-badge" id="insertionDone">DONE</div>
+      </div>
+      <div class="algo-panel heap">
+        <h3>Heap Sort</h3>
+        <svg id="heapSvg"></svg>
+        <div class="stats">Steps: <span id="heapSteps">0</span> | Comparisons: <span id="heapComps">0</span></div>
+        <div class="done-badge" id="heapDone">DONE</div>
+      </div>
+      <div class="algo-panel quick">
+        <h3>Quick Sort</h3>
+        <svg id="quickSvg"></svg>
+        <div class="stats">Steps: <span id="quickSteps">0</span> | Comparisons: <span id="quickComps">0</span></div>
+        <div class="done-badge" id="quickDone">DONE</div>
+      </div>
+    </div>
+    <div class="race-controls">
+      <button id="raceStartPause">Start</button>
+      <button id="raceReset">Reset</button>
+      <button id="raceRandomize">Randomize</button>
+      <label>Speed: <input type="range" id="raceSpeed" min="1" max="10" value="5"></label>
+    </div>
+  </div>
+
+  <!-- SLIDE 5: BUBBLE SORT DEEP DIVE -->
+  <div class="slide" data-slide="5">
+    <h2>Bubble Sort Deep Dive</h2>
+    <div class="two-column">
+      <div class="left-column">
+        <svg id="bubbleDeepSvg"></svg>
+        <div class="single-controls">
+          <button id="bubbleDeepStart">Start</button>
+          <button id="bubbleDeepStep">Step</button>
+          <button id="bubbleDeepReset">Reset</button>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="pseudocode" id="bubblePseudocode"></div>
+        <div class="summary">
+          <strong>Summary:</strong> Repeatedly steps through the list, compares adjacent elements and swaps them if out of order. Largest elements "bubble up" to the end each pass. <br><br>
+          <strong>Time Complexity:</strong> O(n²) average and worst case, O(n) best case<br>
+          <strong>Space Complexity:</strong> O(1) in-place
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 6: INSERTION SORT DEEP DIVE -->
+  <div class="slide" data-slide="6">
+    <h2>Insertion Sort Deep Dive</h2>
+    <div class="two-column">
+      <div class="left-column">
+        <svg id="insertionDeepSvg"></svg>
+        <div class="single-controls">
+          <button id="insertionDeepStart">Start</button>
+          <button id="insertionDeepStep">Step</button>
+          <button id="insertionDeepReset">Reset</button>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="pseudocode" id="insertionPseudocode"></div>
+        <div class="summary">
+          <strong>Summary:</strong> Builds a sorted subarray one element at a time, inserting each element into its correct position among the already-sorted prefix.<br><br>
+          <strong>Time Complexity:</strong> O(n²) average and worst, O(n) best<br>
+          <strong>Space Complexity:</strong> O(1) in-place
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 7: HEAP SORT DEEP DIVE -->
+  <div class="slide" data-slide="7">
+    <h2>Heap Sort Deep Dive</h2>
+    <div class="two-column">
+      <div class="left-column">
+        <svg id="heapDeepSvg"></svg>
+        <div class="single-controls">
+          <button id="heapDeepStart">Start</button>
+          <button id="heapDeepStep">Step</button>
+          <button id="heapDeepReset">Reset</button>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="pseudocode" id="heapPseudocode"></div>
+        <div class="summary">
+          <strong>Summary:</strong> First builds a max-heap from the array, then repeatedly extracts the root (maximum element) and places it at the end, shrinking the heap.<br><br>
+          <strong>Time Complexity:</strong> O(n log n) in all cases<br>
+          <strong>Space Complexity:</strong> O(1) in-place
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 8: QUICK SORT DEEP DIVE -->
+  <div class="slide" data-slide="8">
+    <h2>Quick Sort Deep Dive</h2>
+    <div class="two-column">
+      <div class="left-column">
+        <svg id="quickDeepSvg"></svg>
+        <div class="single-controls">
+          <button id="quickDeepStart">Start</button>
+          <button id="quickDeepStep">Step</button>
+          <button id="quickDeepReset">Reset</button>
+        </div>
+      </div>
+      <div class="right-column">
+        <div class="pseudocode" id="quickPseudocode"></div>
+        <div class="summary">
+          <strong>Summary:</strong> Selects a pivot element, partitions all other elements into those less than or equal to the pivot and those greater, then recursively sorts both partitions.<br><br>
+          <strong>Time Complexity:</strong> O(n log n) average, O(n²) worst<br>
+          <strong>Space Complexity:</strong> O(log n) stack
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLIDE 9: FINAL -->
+  <div class="slide" data-slide="9">
+    <div class="centered">
+      <svg class="final-svg" width="700" height="400" viewBox="0 0 700 400">
+        <!-- Night sky background -->
+        <rect width="700" height="400" fill="#0a0a15"/>
+        
+        <!-- Stars -->
+        <circle cx="50" cy="50" r="2" fill="white"/>
+        <circle cx="150" cy="30" r="1.5" fill="white"/>
+        <circle cx="250" cy="60" r="2" fill="white"/>
+        <circle cx="600" cy="40" r="1.5" fill="white"/>
+        <circle cx="650" cy="80" r="2" fill="white"/>
+        <circle cx="500" cy="30" r="1.5" fill="white"/>
+        
+        <!-- Michigan Stadium - The Big House (overhead view) -->
+        <!-- Outer stadium oval -->
+        <ellipse cx="350" cy="280" rx="280" ry="100" fill="none" stroke="#666" stroke-width="3"/>
+        <ellipse cx="350" cy="280" rx="260" ry="85" fill="none" stroke="#555" stroke-width="2"/>
+        <ellipse cx="350" cy="280" rx="240" ry="70" fill="none" stroke="#444" stroke-width="2"/>
+        
+        <!-- Field -->
+        <rect x="150" y="220" width="400" height="120" fill="#2d5016" rx="5"/>
+        
+        <!-- Yard lines -->
+        <line x1="200" y1="220" x2="200" y2="340" stroke="white" stroke-width="1"/>
+        <line x1="250" y1="220" x2="250" y2="340" stroke="white" stroke-width="1"/>
+        <line x1="300" y1="220" x2="300" y2="340" stroke="white" stroke-width="2"/>
+        <line x1="350" y1="220" x2="350" y2="340" stroke="white" stroke-width="2"/>
+        <line x1="400" y1="220" x2="400" y2="340" stroke="white" stroke-width="2"/>
+        <line x1="450" y1="220" x2="450" y2="340" stroke="white" stroke-width="1"/>
+        <line x1="500" y1="220" x2="500" y2="340" stroke="white" stroke-width="1"/>
+        
+        <!-- End zones -->
+        <rect x="150" y="220" width="50" height="120" fill="#00274C" opacity="0.5"/>
+        <rect x="500" y="220" width="50" height="120" fill="#FFCB05" opacity="0.5"/>
+        
+        <!-- Crowd circles -->
+        <circle cx="120" cy="260" r="3" fill="#FFD700"/>
+        <circle cx="130" cy="270" r="3" fill="#FFD700"/>
+        <circle cx="140" cy="280" r="3" fill="#FFD700"/>
+        <circle cx="130" cy="290" r="3" fill="#FFD700"/>
+        <circle cx="120" cy="300" r="3" fill="#FFD700"/>
+        <circle cx="580" cy="260" r="3" fill="#FFD700"/>
+        <circle cx="570" cy="270" r="3" fill="#FFD700"/>
+        <circle cx="560" cy="280" r="3" fill="#FFD700"/>
+        <circle cx="570" cy="290" r="3" fill="#FFD700"/>
+        <circle cx="580" cy="300" r="3" fill="#FFD700"/>
+        
+        <!-- Spider-Man swinging -->
+        <!-- Web line -->
+        <path d="M 100 50 Q 200 100 250 150" stroke="#ddd" stroke-width="2" fill="none"/>
+        
+        <!-- Spider-Man figure at end of web -->
+        <!-- Head -->
+        <circle cx="250" cy="150" r="12" fill="#E23636"/>
+        <ellipse cx="245" cy="148" rx="3" ry="4" fill="white"/>
+        <ellipse cx="255" cy="148" rx="3" ry="4" fill="white"/>
+        
+        <!-- Body -->
+        <ellipse cx="250" cy="170" rx="10" ry="15" fill="#E23636"/>
+        <path d="M 245 165 L 255 165 M 245 170 L 255 170 M 245 175 L 255 175" stroke="#1E90FF" stroke-width="1"/>
+        
+        <!-- Arms -->
+        <line x1="250" y1="165" x2="230" y2="155" stroke="#E23636" stroke-width="4"/>
+        <line x1="250" y1="165" x2="270" y2="175" stroke="#E23636" stroke-width="4"/>
+        <circle cx="230" cy="155" r="3" fill="#E23636"/>
+        <circle cx="270" cy="175" r="3" fill="#E23636"/>
+        
+        <!-- Legs -->
+        <line x1="250" y1="185" x2="240" y2="205" stroke="#1E90FF" stroke-width="4"/>
+        <line x1="250" y1="185" x2="260" y2="200" stroke="#1E90FF" stroke-width="4"/>
+        <circle cx="240" cy="205" r="3" fill="#E23636"/>
+        <circle cx="260" cy="200" r="3" fill="#E23636"/>
+      </svg>
+      
+      <h3 style="margin: 30px 0;">Sorting complete! Just like Spider-Man always lands on his feet... every algorithm finds its order.</h3>
+      
+      <table style="max-width: 800px; margin: 0 auto;">
+        <thead>
+          <tr>
+            <th>Rank</th>
+            <th>Title</th>
+            <th>Year</th>
+            <th>Revenue (USD)</th>
+          </tr>
+        </thead>
+        <tbody id="finalTable">
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div id="controls">
+  <button id="prevBtn">← Previous</button>
+  <div id="slideCounter">1 / 9</div>
+  <button id="nextBtn">Next →</button>
+</div>
+
+<script>
+// Data
+const movies = [
+  { label: 'NWH', title: 'No Way Home', year: 2021, revenue: 1901216740 },
+  { label: 'FFH', title: 'Far From Home', year: 2019, revenue: 1131927996 },
+  { label: 'SM3', title: 'Spider-Man 3', year: 2007, revenue: 890871626 },
+  { label: 'HC', title: 'Homecoming', year: 2017, revenue: 880166924 },
+  { label: 'SM1', title: 'Spider-Man', year: 2002, revenue: 821708551 },
+  { label: 'SM2', title: 'Spider-Man 2', year: 2004, revenue: 789115139 },
+  { label: 'TASM1', title: 'The Amazing Spider-Man', year: 2012, revenue: 757930663 },
+  { label: 'TASM2', title: 'The Amazing Spider-Man 2', year: 2014, revenue: 708982323 },
+  { label: 'ATSV', title: 'Across the Spider-Verse', year: 2023, revenue: 690622566 },
+  { label: 'ITSV', title: 'Into the Spider-Verse', year: 2018, revenue: 384289695 },
+  { label: 'BTSV', title: 'Beyond the Spider-Verse', year: 2026, revenue: 600000000 }
+];
+
+// Slide navigation
+let currentSlide = 1;
+const totalSlides = 9;
+
+function showSlide(n) {
+  const slides = document.querySelectorAll('.slide');
+  slides.forEach((slide, index) => {
+    slide.classList.remove('active', 'prev');
+    if (index + 1 === n) {
+      slide.classList.add('active');
+    } else if (index + 1 < n) {
+      slide.classList.add('prev');
+    }
+  });
+  currentSlide = n;
+  document.getElementById('slideCounter').textContent = `${n} / ${totalSlides}`;
+  document.getElementById('prevBtn').disabled = n === 1;
+  document.getElementById('nextBtn').disabled = n === totalSlides;
+}
+
+document.getElementById('prevBtn').addEventListener('click', () => {
+  if (currentSlide > 1) showSlide(currentSlide - 1);
+});
+
+document.getElementById('nextBtn').addEventListener('click', () => {
+  if (currentSlide < totalSlides) showSlide(currentSlide + 1);
+});
+
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowLeft' && currentSlide > 1) {
+    showSlide(currentSlide - 1);
+  } else if (e.key === 'ArrowRight' && currentSlide < totalSlides) {
+    showSlide(currentSlide + 1);
+  }
+});
+
+// Populate data table (Slide 2)
+function populateDataTable() {
+  const tbody = document.getElementById('dataTable');
+  const sorted = [...movies].sort((a, b) => b.revenue - a.revenue);
+  sorted.forEach((movie, index) => {
+    const row = tbody.insertRow();
+    row.insertCell(0).textContent = index + 1;
+    row.insertCell(1).textContent = movie.title;
+    row.insertCell(2).textContent = movie.year;
+    row.insertCell(3).textContent = '$' + movie.revenue.toLocaleString();
+  });
+}
+
+// Populate final table (Slide 9)
+function populateFinalTable() {
+  const tbody = document.getElementById('finalTable');
+  const sorted = [...movies].sort((a, b) => b.revenue - a.revenue);
+  const medals = ['🥇', '🥈', '🥉'];
+  sorted.forEach((movie, index) => {
+    const row = tbody.insertRow();
+    const rankCell = row.insertCell(0);
+    rankCell.innerHTML = (index < 3 ? `<span class="medal">${medals[index]}</span>` : '') + (index + 1);
+    row.insertCell(1).textContent = movie.title;
+    row.insertCell(2).textContent = movie.year;
+    row.insertCell(3).textContent = '$' + movie.revenue.toLocaleString();
+  });
+}
+
+populateDataTable();
+populateFinalTable();
+
+// Utility: shuffle array
+function shuffleArray(arr) {
+  const result = [...arr];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+}
+
+// Draw bars in SVG
+function drawBars(svg, arr, comparing = [], swapping = [], sorted = [], pivot = -1, heapBoundary = -1, accentColor = '#E23636') {
+  svg.innerHTML = '';
+  const width = svg.clientWidth || 400;
+  const height = svg.clientHeight || 200;
+  const barWidth = width / arr.length;
+  const maxRevenue = Math.max(...movies.map(m => m.revenue));
+  
+  arr.forEach((movie, i) => {
+    const barHeight = (movie.revenue / maxRevenue) * (height - 40);
+    const x = i * barWidth;
+    const y = height - barHeight - 20;
+    
+    let fill = '#555555';
+    if (sorted.includes(i)) {
+      fill = accentColor;
+    } else if (pivot === i) {
+      fill = '#9B59B6';
+    } else if (swapping.includes(i)) {
+      fill = '#FF4444';
+    } else if (comparing.includes(i)) {
+      fill = '#FFD700';
+    }
+    
+    const rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x + 2);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', barWidth - 4);
+    rect.setAttribute('height', barHeight);
+    rect.setAttribute('fill', fill);
+    svg.appendChild(rect);
+    
+    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    text.setAttribute('x', x + barWidth / 2);
+    text.setAttribute('y', height - 5);
+    text.setAttribute('text-anchor', 'middle');
+    text.setAttribute('fill', 'white');
+    text.setAttribute('font-size', '10');
+    text.textContent = movie.label;
+    svg.appendChild(text);
+  });
+  
+  if (heapBoundary >= 0 && heapBoundary < arr.length) {
+    const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    line.setAttribute('x1', heapBoundary * barWidth);
+    line.setAttribute('y1', 0);
+    line.setAttribute('x2', heapBoundary * barWidth);
+    line.setAttribute('y2', height - 20);
+    line.setAttribute('stroke', '#00C851');
+    line.setAttribute('stroke-width', '3');
+    line.setAttribute('stroke-dasharray', '5,5');
+    svg.appendChild(line);
+  }
+}
+
+// Bubble Sort Generator
+function* bubbleSortGenerator(arr) {
+  const n = arr.length;
+  let comparisons = 0;
+  let swaps = 0;
+  
+  for (let outerIdx = 0; outerIdx < n - 1; outerIdx++) {
+    let swapped = false;
+    for (let innerIdx = 0; innerIdx < n - outerIdx - 1; innerIdx++) {
+      comparisons++;
+      yield {
+        arr: [...arr],
+        comparing: [innerIdx, innerIdx + 1],
+        swapping: [],
+        sorted: Array.from({length: outerIdx}, (_, i) => n - 1 - i),
+        lines: [6],
+        comparisons,
+        swaps
+      };
+      
+      if (arr[innerIdx].revenue > arr[innerIdx + 1].revenue) {
+        [arr[innerIdx], arr[innerIdx + 1]] = [arr[innerIdx + 1], arr[innerIdx]];
+        swaps++;
+        swapped = true;
+        yield {
+          arr: [...arr],
+          comparing: [],
+          swapping: [innerIdx, innerIdx + 1],
+          sorted: Array.from({length: outerIdx}, (_, i) => n - 1 - i),
+          lines: [7],
+          comparisons,
+          swaps
+        };
+      }
+    }
+    if (!swapped) break;
+  }
+  
+  yield {
+    arr: [...arr],
+    comparing: [],
+    swapping: [],
+    sorted: Array.from({length: n}, (_, i) => i),
+    lines: [],
+    comparisons,
+    swaps,
+    done: true
+  };
+}
+
+// Insertion Sort Generator
+function* insertionSortGenerator(arr) {
+  const n = arr.length;
+  let comparisons = 0;
+  let swaps = 0;
+  
+  for (let outerIdx = 1; outerIdx < n; outerIdx++) {
+    const key = arr[outerIdx];
+    let innerIdx = outerIdx - 1;
+    
+    while (innerIdx >= 0 && arr[innerIdx].revenue > key.revenue) {
+      comparisons++;
+      yield {
+        arr: [...arr],
+        comparing: [innerIdx, innerIdx + 1],
+        swapping: [],
+        sorted: [],
+        lines: [6],
+        comparisons,
+        swaps
+      };
+      
+      arr[innerIdx + 1] = arr[innerIdx];
+      swaps++;
+      yield {
+        arr: [...arr],
+        comparing: [],
+        swapping: [innerIdx, innerIdx + 1],
+        sorted: [],
+        lines: [7],
+        comparisons,
+        swaps
+      };
+      
+      innerIdx--;
+    }
+    if (innerIdx >= 0) comparisons++;
+    
+    arr[innerIdx + 1] = key;
+    yield {
+      arr: [...arr],
+      comparing: [],
+      swapping: [],
+      sorted: Array.from({length: outerIdx + 1}, (_, i) => i),
+      lines: [10],
+      comparisons,
+      swaps
+    };
+  }
+  
+  yield {
+    arr: [...arr],
+    comparing: [],
+    swapping: [],
+    sorted: Array.from({length: n}, (_, i) => i),
+    lines: [],
+    comparisons,
+    swaps,
+    done: true
+  };
+}
+
+// Heap Sort Generator
+function* heapSortGenerator(arr) {
+  const n = arr.length;
+  let comparisons = 0;
+  let swaps = 0;
+  
+  function* heapify(heapSize, nodeIdx) {
+    const stack = [nodeIdx];
+    
+    while (stack.length > 0) {
+      const current = stack.pop();
+      let largest = current;
+      const leftChild = 2 * current + 1;
+      const rightChild = 2 * current + 2;
+      
+      if (leftChild < heapSize) {
+        comparisons++;
+        yield {
+          arr: [...arr],
+          comparing: [current, leftChild],
+          swapping: [],
+          sorted: [],
+          lines: [15],
+          comparisons,
+          swaps,
+          heapBoundary: heapSize
+        };
+        
+        if (arr[leftChild].revenue > arr[largest].revenue) {
+          largest = leftChild;
+        }
+      }
+      
+      if (rightChild < heapSize) {
+        comparisons++;
+        yield {
+          arr: [...arr],
+          comparing: [largest, rightChild],
+          swapping: [],
+          sorted: [],
+          lines: [18],
+          comparisons,
+          swaps,
+          heapBoundary: heapSize
+        };
+        
+        if (arr[rightChild].revenue > arr[largest].revenue) {
+          largest = rightChild;
+        }
+      }
+      
+      if (largest !== current) {
+        [arr[current], arr[largest]] = [arr[largest], arr[current]];
+        swaps++;
+        yield {
+          arr: [...arr],
+          comparing: [],
+          swapping: [current, largest],
+          sorted: [],
+          lines: [22],
+          comparisons,
+          swaps,
+          heapBoundary: heapSize
+        };
+        
+        stack.push(largest);
+      }
+    }
+  }
+  
+  // Build heap
+  for (let nodeIdx = Math.floor(n / 2) - 1; nodeIdx >= 0; nodeIdx--) {
+    yield* heapify(n, nodeIdx);
+  }
+  
+  // Extract elements
+  for (let endIdx = n - 1; endIdx > 0; endIdx--) {
+    [arr[0], arr[endIdx]] = [arr[endIdx], arr[0]];
+    swaps++;
+    yield {
+      arr: [...arr],
+      comparing: [],
+      swapping: [0, endIdx],
+      sorted: Array.from({length: n - endIdx}, (_, i) => endIdx + i),
+      lines: [7],
+      comparisons,
+      swaps,
+      heapBoundary: endIdx
+    };
+    
+    yield* heapify(endIdx, 0);
+  }
+  
+  yield {
+    arr: [...arr],
+    comparing: [],
+    swapping: [],
+    sorted: Array.from({length: n}, (_, i) => i),
+    lines: [],
+    comparisons,
+    swaps,
+    done: true
+  };
+}
+
+// Quick Sort Generator
+function* quickSortGenerator(arr) {
+  const n = arr.length;
+  let comparisons = 0;
+  let swaps = 0;
+  const stack = [[0, n - 1]];
+  
+  while (stack.length > 0) {
+    const [low, high] = stack.pop();
+    
+    if (low < high) {
+      // Partition
+      const pivot = arr[high];
+      let scanIdx = low - 1;
+      
+      yield {
+        arr: [...arr],
+        comparing: [],
+        swapping: [],
+        sorted: [],
+        lines: [9],
+        comparisons,
+        swaps,
+        pivot: high
+      };
+      
+      for (let loopIdx = low; loopIdx < high; loopIdx++) {
+        comparisons++;
+        yield {
+          arr: [...arr],
+          comparing: [loopIdx, high],
+          swapping: [],
+          sorted: [],
+          lines: [12],
+          comparisons,
+          swaps,
+          pivot: high
+        };
+        
+        if (arr[loopIdx].revenue <= pivot.revenue) {
+          scanIdx++;
+          if (scanIdx !== loopIdx) {
+            [arr[scanIdx], arr[loopIdx]] = [arr[loopIdx], arr[scanIdx]];
+            swaps++;
+            yield {
+              arr: [...arr],
+              comparing: [],
+              swapping: [scanIdx, loopIdx],
+              sorted: [],
+              lines: [14],
+              comparisons,
+              swaps,
+              pivot: high
+            };
+          }
+        }
+      }
+      
+      [arr[scanIdx + 1], arr[high]] = [arr[high], arr[scanIdx + 1]];
+      swaps++;
+      const pivotPos = scanIdx + 1;
+      yield {
+        arr: [...arr],
+        comparing: [],
+        swapping: [scanIdx + 1, high],
+        sorted: [],
+        lines: [17],
+        comparisons,
+        swaps,
+        pivot: pivotPos
+      };
+      
+      stack.push([pivotPos + 1, high]);
+      stack.push([low, pivotPos - 1]);
+    }
+  }
+  
+  yield {
+    arr: [...arr],
+    comparing: [],
+    swapping: [],
+    sorted: Array.from({length: n}, (_, i) => i),
+    lines: [],
+    comparisons,
+    swaps,
+    done: true
+  };
+}
+
+// SLIDE 4: The Big Race
+const raceState = {
+  bubble: { gen: null, arr: [], step: null, done: false },
+  insertion: { gen: null, arr: [], step: null, done: false },
+  heap: { gen: null, arr: [], step: null, done: false },
+  quick: { gen: null, arr: [], step: null, done: false },
+  running: false,
+  interval: null,
+  speed: 5
+};
+
+function initRace() {
+  const shuffled = shuffleArray(movies);
+  raceState.bubble.arr = [...shuffled];
+  raceState.insertion.arr = [...shuffled];
+  raceState.heap.arr = [...shuffled];
+  raceState.quick.arr = [...shuffled];
+  
+  raceState.bubble.gen = bubbleSortGenerator(raceState.bubble.arr);
+  raceState.insertion.gen = insertionSortGenerator(raceState.insertion.arr);
+  raceState.heap.gen = heapSortGenerator(raceState.heap.arr);
+  raceState.quick.gen = quickSortGenerator(raceState.quick.arr);
+  
+  raceState.bubble.done = false;
+  raceState.insertion.done = false;
+  raceState.heap.done = false;
+  raceState.quick.done = false;
+  
+  document.getElementById('bubbleDone').classList.remove('show');
+  document.getElementById('insertionDone').classList.remove('show');
+  document.getElementById('heapDone').classList.remove('show');
+  document.getElementById('quickDone').classList.remove('show');
+  
+  document.getElementById('bubbleSteps').textContent = '0';
+  document.getElementById('bubbleComps').textContent = '0';
+  document.getElementById('insertionSteps').textContent = '0';
+  document.getElementById('insertionComps').textContent = '0';
+  document.getElementById('heapSteps').textContent = '0';
+  document.getElementById('heapComps').textContent = '0';
+  document.getElementById('quickSteps').textContent = '0';
+  document.getElementById('quickComps').textContent = '0';
+  
+  drawBars(document.getElementById('bubbleSvg'), raceState.bubble.arr, [], [], [], -1, -1, '#E23636');
+  drawBars(document.getElementById('insertionSvg'), raceState.insertion.arr, [], [], [], -1, -1, '#1E90FF');
+  drawBars(document.getElementById('heapSvg'), raceState.heap.arr, [], [], [], -1, -1, '#00C851');
+  drawBars(document.getElementById('quickSvg'), raceState.quick.arr, [], [], [], -1, -1, '#FF8C00');
+}
+
+function stepRace() {
+  let allDone = true;
+  
+  if (!raceState.bubble.done) {
+    const result = raceState.bubble.gen.next();
+    if (!result.done) {
+      allDone = false;
+      raceState.bubble.step = result.value;
+      drawBars(document.getElementById('bubbleSvg'), raceState.bubble.step.arr, 
+        raceState.bubble.step.comparing, raceState.bubble.step.swapping, 
+        raceState.bubble.step.sorted, -1, -1, '#E23636');
+      document.getElementById('bubbleComps').textContent = raceState.bubble.step.comparisons;
+    } else {
+      raceState.bubble.done = true;
+      document.getElementById('bubbleDone').classList.add('show');
+    }
+  }
+  
+  if (!raceState.insertion.done) {
+    const result = raceState.insertion.gen.next();
+    if (!result.done) {
+      allDone = false;
+      raceState.insertion.step = result.value;
+      drawBars(document.getElementById('insertionSvg'), raceState.insertion.step.arr, 
+        raceState.insertion.step.comparing, raceState.insertion.step.swapping, 
+        raceState.insertion.step.sorted, -1, -1, '#1E90FF');
+      document.getElementById('insertionComps').textContent = raceState.insertion.step.comparisons;
+    } else {
+      raceState.insertion.done = true;
+      document.getElementById('insertionDone').classList.add('show');
+    }
+  }
+  
+  if (!raceState.heap.done) {
+    const result = raceState.heap.gen.next();
+    if (!result.done) {
+      allDone = false;
+      raceState.heap.step = result.value;
+      drawBars(document.getElementById('heapSvg'), raceState.heap.step.arr, 
+        raceState.heap.step.comparing, raceState.heap.step.swapping, 
+        raceState.heap.step.sorted, -1, raceState.heap.step.heapBoundary || -1, '#00C851');
+      document.getElementById('heapComps').textContent = raceState.heap.step.comparisons;
+    } else {
+      raceState.heap.done = true;
+      document.getElementById('heapDone').classList.add('show');
+    }
+  }
+  
+  if (!raceState.quick.done) {
+    const result = raceState.quick.gen.next();
+    if (!result.done) {
+      allDone = false;
+      raceState.quick.step = result.value;
+      drawBars(document.getElementById('quickSvg'), raceState.quick.step.arr, 
+        raceState.quick.step.comparing, raceState.quick.step.swapping, 
+        raceState.quick.step.sorted, raceState.quick.step.pivot || -1, -1, '#FF8C00');
+      document.getElementById('quickComps').textContent = raceState.quick.step.comparisons;
+    } else {
+      raceState.quick.done = true;
+      document.getElementById('quickDone').classList.add('show');
+    }
+  }
+  
+  if (allDone && raceState.running) {
+    clearInterval(raceState.interval);
+    raceState.running = false;
+    document.getElementById('raceStartPause').textContent = 'Start';
+  }
+}
+
+document.getElementById('raceStartPause').addEventListener('click', () => {
+  if (raceState.running) {
+    clearInterval(raceState.interval);
+    raceState.running = false;
+    document.getElementById('raceStartPause').textContent = 'Start';
+  } else {
+    raceState.running = true;
+    document.getElementById('raceStartPause').textContent = 'Pause';
+    const speed = parseInt(document.getElementById('raceSpeed').value);
+    const delay = 800 - (speed - 1) * 77;
+    raceState.interval = setInterval(stepRace, delay);
+  }
+});
+
+document.getElementById('raceReset').addEventListener('click', () => {
+  if (raceState.running) {
+    clearInterval(raceState.interval);
+    raceState.running = false;
+    document.getElementById('raceStartPause').textContent = 'Start';
+  }
+  initRace();
+});
+
+document.getElementById('raceRandomize').addEventListener('click', () => {
+  if (raceState.running) {
+    clearInterval(raceState.interval);
+    raceState.running = false;
+    document.getElementById('raceStartPause').textContent = 'Start';
+  }
+  initRace();
+});
+
+document.getElementById('raceSpeed').addEventListener('input', (e) => {
+  raceState.speed = parseInt(e.target.value);
+  if (raceState.running) {
+    clearInterval(raceState.interval);
+    const delay = 800 - (raceState.speed - 1) * 77;
+    raceState.interval = setInterval(stepRace, delay);
+  }
+});
+
+initRace();
+
+// SLIDE 5: Bubble Sort Deep Dive
+const bubblePseudocodeLines = [
+  'procedure BUBBLE_SORT(array A)',
+  '  n ← length of A',
+  '  for outerIdx from 0 to n-1 do',
+  '    swapped ← false',
+  '    for innerIdx from 0 to n-outerIdx-2 do',
+  '      if A[innerIdx] > A[innerIdx+1] then',
+  '        swap A[innerIdx] and A[innerIdx+1]',
+  '        swapped ← true',
+  '      end if',
+  '    end for',
+  '    if not swapped then break',
+  '  end for',
+  'end procedure'
+];
+
+const bubbleDeepState = {
+  gen: null,
+  arr: [],
+  step: null,
+  running: false,
+  interval: null
+};
+
+function initBubbleDeep() {
+  bubbleDeepState.arr = shuffleArray(movies);
+  bubbleDeepState.gen = bubbleSortGenerator(bubbleDeepState.arr);
+  bubbleDeepState.step = null;
+  drawBars(document.getElementById('bubbleDeepSvg'), bubbleDeepState.arr, [], [], [], -1, -1, '#E23636');
+  renderPseudocode('bubblePseudocode', bubblePseudocodeLines, []);
+}
+
+function stepBubbleDeep() {
+  const result = bubbleDeepState.gen.next();
+  if (!result.done) {
+    bubbleDeepState.step = result.value;
+    drawBars(document.getElementById('bubbleDeepSvg'), bubbleDeepState.step.arr, 
+      bubbleDeepState.step.comparing, bubbleDeepState.step.swapping, 
+      bubbleDeepState.step.sorted, -1, -1, '#E23636');
+    renderPseudocode('bubblePseudocode', bubblePseudocodeLines, bubbleDeepState.step.lines);
+  } else {
+    if (bubbleDeepState.running) {
+      clearInterval(bubbleDeepState.interval);
+      bubbleDeepState.running = false;
+      document.getElementById('bubbleDeepStart').textContent = 'Start';
+    }
+  }
+}
+
+function renderPseudocode(elementId, lines, activeLines) {
+  const container = document.getElementById(elementId);
+  container.innerHTML = '';
+  lines.forEach((line, index) => {
+    const div = document.createElement('div');
+    div.className = 'code-line';
+    if (activeLines.includes(index + 1)) {
+      div.classList.add('active');
+    }
+    const lineNum = document.createElement('span');
+    lineNum.className = 'line-num';
+    lineNum.textContent = (index + 1).toString().padStart(2, ' ');
+    div.appendChild(lineNum);
+    const code = document.createElement('span');
+    code.textContent = line;
+    div.appendChild(code);
+    container.appendChild(div);
+  });
+}
+
+document.getElementById('bubbleDeepStart').addEventListener('click', () => {
+  if (bubbleDeepState.running) {
+    clearInterval(bubbleDeepState.interval);
+    bubbleDeepState.running = false;
+    document.getElementById('bubbleDeepStart').textContent = 'Start';
+  } else {
+    bubbleDeepState.running = true;
+    document.getElementById('bubbleDeepStart').textContent = 'Pause';
+    bubbleDeepState.interval = setInterval(stepBubbleDeep, 300);
+  }
+});
+
+document.getElementById('bubbleDeepStep').addEventListener('click', () => {
+  stepBubbleDeep();
+});
+
+document.getElementById('bubbleDeepReset').addEventListener('click', () => {
+  if (bubbleDeepState.running) {
+    clearInterval(bubbleDeepState.interval);
+    bubbleDeepState.running = false;
+    document.getElementById('bubbleDeepStart').textContent = 'Start';
+  }
+  initBubbleDeep();
+});
+
+initBubbleDeep();
+
+// SLIDE 6: Insertion Sort Deep Dive
+const insertionPseudocodeLines = [
+  'procedure INSERTION_SORT(array A)',
+  '  n ← length of A',
+  '  for outerIdx from 1 to n-1 do',
+  '    key ← A[outerIdx]',
+  '    innerIdx ← outerIdx - 1',
+  '    while innerIdx >= 0 and A[innerIdx] > key do',
+  '      A[innerIdx+1] ← A[innerIdx]',
+  '      innerIdx ← innerIdx - 1',
+  '    end while',
+  '    A[innerIdx+1] ← key',
+  '  end for',
+  'end procedure'
+];
+
+const insertionDeepState = {
+  gen: null,
+  arr: [],
+  step: null,
+  running: false,
+  interval: null
+};
+
+function initInsertionDeep() {
+  insertionDeepState.arr = shuffleArray(movies);
+  insertionDeepState.gen = insertionSortGenerator(insertionDeepState.arr);
+  insertionDeepState.step = null;
+  drawBars(document.getElementById('insertionDeepSvg'), insertionDeepState.arr, [], [], [], -1, -1, '#1E90FF');
+  renderPseudocode('insertionPseudocode', insertionPseudocodeLines, []);
+}
+
+function stepInsertionDeep() {
+  const result = insertionDeepState.gen.next();
+  if (!result.done) {
+    insertionDeepState.step = result.value;
+    drawBars(document.getElementById('insertionDeepSvg'), insertionDeepState.step.arr, 
+      insertionDeepState.step.comparing, insertionDeepState.step.swapping, 
+      insertionDeepState.step.sorted, -1, -1, '#1E90FF');
+    renderPseudocode('insertionPseudocode', insertionPseudocodeLines, insertionDeepState.step.lines);
+  } else {
+    if (insertionDeepState.running) {
+      clearInterval(insertionDeepState.interval);
+      insertionDeepState.running = false;
+      document.getElementById('insertionDeepStart').textContent = 'Start';
+    }
+  }
+}
+
+document.getElementById('insertionDeepStart').addEventListener('click', () => {
+  if (insertionDeepState.running) {
+    clearInterval(insertionDeepState.interval);
+    insertionDeepState.running = false;
+    document.getElementById('insertionDeepStart').textContent = 'Start';
+  } else {
+    insertionDeepState.running = true;
+    document.getElementById('insertionDeepStart').textContent = 'Pause';
+    insertionDeepState.interval = setInterval(stepInsertionDeep, 300);
+  }
+});
+
+document.getElementById('insertionDeepStep').addEventListener('click', () => {
+  stepInsertionDeep();
+});
+
+document.getElementById('insertionDeepReset').addEventListener('click', () => {
+  if (insertionDeepState.running) {
+    clearInterval(insertionDeepState.interval);
+    insertionDeepState.running = false;
+    document.getElementById('insertionDeepStart').textContent = 'Start';
+  }
+  initInsertionDeep();
+});
+
+initInsertionDeep();
+
+// SLIDE 7: Heap Sort Deep Dive
+const heapPseudocodeLines = [
+  'procedure HEAP_SORT(array A)',
+  '  n ← length of A',
+  '  for nodeIdx from ⌊n/2⌋-1 down to 0 do',
+  '    HEAPIFY(A, n, nodeIdx)',
+  '  end for',
+  '  for endIdx from n-1 down to 1 do',
+  '    swap A[0] and A[endIdx]',
+  '    HEAPIFY(A, endIdx, 0)',
+  '  end for',
+  'end procedure',
+  '',
+  'procedure HEAPIFY(A, heapSize, nodeIdx)',
+  '  largest ← nodeIdx',
+  '  leftChild ← 2×nodeIdx + 1',
+  '  rightChild ← 2×nodeIdx + 2',
+  '  if leftChild < heapSize and A[leftChild] > A[largest] then',
+  '    largest ← leftChild',
+  '  end if',
+  '  if rightChild < heapSize and A[rightChild] > A[largest] then',
+  '    largest ← rightChild',
+  '  end if',
+  '  if largest ≠ nodeIdx then',
+  '    swap A[nodeIdx] and A[largest]',
+  '    recurse HEAPIFY(A, heapSize, largest)',
+  '  end if',
+  'end procedure'
+];
+
+const heapDeepState = {
+  gen: null,
+  arr: [],
+  step: null,
+  running: false,
+  interval: null
+};
+
+function initHeapDeep() {
+  heapDeepState.arr = shuffleArray(movies);
+  heapDeepState.gen = heapSortGenerator(heapDeepState.arr);
+  heapDeepState.step = null;
+  drawBars(document.getElementById('heapDeepSvg'), heapDeepState.arr, [], [], [], -1, -1, '#00C851');
+  renderPseudocode('heapPseudocode', heapPseudocodeLines, []);
+}
+
+function stepHeapDeep() {
+  const result = heapDeepState.gen.next();
+  if (!result.done) {
+    heapDeepState.step = result.value;
+    drawBars(document.getElementById('heapDeepSvg'), heapDeepState.step.arr, 
+      heapDeepState.step.comparing, heapDeepState.step.swapping, 
+      heapDeepState.step.sorted, -1, heapDeepState.step.heapBoundary || -1, '#00C851');
+    renderPseudocode('heapPseudocode', heapPseudocodeLines, heapDeepState.step.lines);
+  } else {
+    if (heapDeepState.running) {
+      clearInterval(heapDeepState.interval);
+      heapDeepState.running = false;
+      document.getElementById('heapDeepStart').textContent = 'Start';
+    }
+  }
+}
+
+document.getElementById('heapDeepStart').addEventListener('click', () => {
+  if (heapDeepState.running) {
+    clearInterval(heapDeepState.interval);
+    heapDeepState.running = false;
+    document.getElementById('heapDeepStart').textContent = 'Start';
+  } else {
+    heapDeepState.running = true;
+    document.getElementById('heapDeepStart').textContent = 'Pause';
+    heapDeepState.interval = setInterval(stepHeapDeep, 300);
+  }
+});
+
+document.getElementById('heapDeepStep').addEventListener('click', () => {
+  stepHeapDeep();
+});
+
+document.getElementById('heapDeepReset').addEventListener('click', () => {
+  if (heapDeepState.running) {
+    clearInterval(heapDeepState.interval);
+    heapDeepState.running = false;
+    document.getElementById('heapDeepStart').textContent = 'Start';
+  }
+  initHeapDeep();
+});
+
+initHeapDeep();
+
+// SLIDE 8: Quick Sort Deep Dive
+const quickPseudocodeLines = [
+  'procedure QUICK_SORT(A, loIdx, hiIdx)',
+  '  if loIdx < hiIdx then',
+  '    pivotPos ← PARTITION(A, loIdx, hiIdx)',
+  '    QUICK_SORT(A, loIdx, pivotPos-1)',
+  '    QUICK_SORT(A, pivotPos+1, hiIdx)',
+  '  end if',
+  'end procedure',
+  '',
+  'procedure PARTITION(A, loIdx, hiIdx)',
+  '  pivot ← A[hiIdx]',
+  '  scanIdx ← loIdx - 1',
+  '  for loopIdx from loIdx to hiIdx-1 do',
+  '    if A[loopIdx] ≤ pivot then',
+  '      scanIdx ← scanIdx + 1',
+  '      swap A[scanIdx] and A[loopIdx]',
+  '    end if',
+  '  end for',
+  '  swap A[scanIdx+1] and A[hiIdx]',
+  '  return scanIdx + 1',
+  'end procedure'
+];
+
+const quickDeepState = {
+  gen: null,
+  arr: [],
+  step: null,
+  running: false,
+  interval: null
+};
+
+function initQuickDeep() {
+  quickDeepState.arr = shuffleArray(movies);
+  quickDeepState.gen = quickSortGenerator(quickDeepState.arr);
+  quickDeepState.step = null;
+  drawBars(document.getElementById('quickDeepSvg'), quickDeepState.arr, [], [], [], -1, -1, '#FF8C00');
+  renderPseudocode('quickPseudocode', quickPseudocodeLines, []);
+}
+
+function stepQuickDeep() {
+  const result = quickDeepState.gen.next();
+  if (!result.done) {
+    quickDeepState.step = result.value;
+    drawBars(document.getElementById('quickDeepSvg'), quickDeepState.step.arr, 
+      quickDeepState.step.comparing, quickDeepState.step.swapping, 
+      quickDeepState.step.sorted, quickDeepState.step.pivot || -1, -1, '#FF8C00');
+    renderPseudocode('quickPseudocode', quickPseudocodeLines, quickDeepState.step.lines);
+  } else {
+    if (quickDeepState.running) {
+      clearInterval(quickDeepState.interval);
+      quickDeepState.running = false;
+      document.getElementById('quickDeepStart').textContent = 'Start';
+    }
+  }
+}
+
+document.getElementById('quickDeepStart').addEventListener('click', () => {
+  if (quickDeepState.running) {
+    clearInterval(quickDeepState.interval);
+    quickDeepState.running = false;
+    document.getElementById('quickDeepStart').textContent = 'Start';
+  } else {
+    quickDeepState.running = true;
+    document.getElementById('quickDeepStart').textContent = 'Pause';
+    quickDeepState.interval = setInterval(stepQuickDeep, 300);
+  }
+});
+
+document.getElementById('quickDeepStep').addEventListener('click', () => {
+  stepQuickDeep();
+});
+
+document.getElementById('quickDeepReset').addEventListener('click', () => {
+  if (quickDeepState.running) {
+    clearInterval(quickDeepState.interval);
+    quickDeepState.running = false;
+    document.getElementById('quickDeepStart').textContent = 'Start';
+  }
+  initQuickDeep();
+});
+
+initQuickDeep();
+</script>
+
+</body>
+</html>
