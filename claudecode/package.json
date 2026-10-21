@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "dev": "slidev --open",
-    "build": "slidev build --base /sortingthespiderverse/claudecode/",
+    "build": "slidev build --base /graybox-sortingthespiderverse/claudecode/",
     "export": "slidev export"
   },
   "dependencies": {

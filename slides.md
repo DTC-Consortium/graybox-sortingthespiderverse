@@ -1,7 +1,7 @@
 ---
 theme: default
 title: Sorting the Spider-Verse
-base: /sortingthespiderverse/
+base: /graybox-sortingthespiderverse/
 info: |
   ## Sorting the Spider-Verse
   Sorting algorithms visualized through Spider-Man box-office data.
