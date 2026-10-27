@@ -27,7 +27,7 @@ fonts:
 
 <div class="title-footer">
 <div class="nav-hint">Press → to move forward through the deck</div>
-<div class="credit">Chad Jenkins (ocj@umich.edu) · ocj-dev.github.io/sortingthespiderverse</div>
+<div class="credit">Chad Jenkins (ocj@umich.edu) · ocj-dev.github.io/sortingthespiderverse · CC BY 4.0 · 2026</div>
 </div>
 
 <!--
